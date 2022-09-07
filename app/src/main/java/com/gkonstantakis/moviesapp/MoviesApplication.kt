@@ -6,8 +6,8 @@ import com.gkonstantakis.moviesapp.movies.mapping.NetworkSearchItemMapper
 import com.gkonstantakis.moviesapp.movies.mapping.NetworkTrailersMapper
 import com.gkonstantakis.moviesapp.movies.mapping.NetworkTvShowMapper
 import com.gkonstantakis.moviesapp.movies.network.MovieNetworkService
-import com.gkonstantakis.moviesapp.movies.repositories.DetailsRepository
-import com.gkonstantakis.moviesapp.movies.repositories.SearchRepository
+import com.gkonstantakis.moviesapp.movies.repositories.MovieRepository
+import com.gkonstantakis.moviesapp.movies.repositories.MovieRepositoryImpl
 import com.gkonstantakis.moviesapp.movies.utils.Constant
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -17,8 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class MoviesApplication : Application() {
 
     lateinit var moviesNetworkService: MovieNetworkService
-    lateinit var searchRepository: SearchRepository
-    lateinit var detailsRepository: DetailsRepository
+    lateinit var movieRepository: MovieRepository
 
     override fun onCreate() {
         super.onCreate()
@@ -27,22 +26,16 @@ class MoviesApplication : Application() {
             provideGsonBuilder().let {
                 provideNetwork(it).build().create(MovieNetworkService::class.java)
             }
-        searchRepository =
+        movieRepository =
             moviesNetworkService.let {
-                SearchRepository(
+                MovieRepositoryImpl(
                     moviesNetworkService,
-                    NetworkSearchItemMapper()
+                    NetworkSearchItemMapper(),
+                    NetworkMovieMapper(),
+                    NetworkTvShowMapper(),
+                    NetworkTrailersMapper()
                 )
             }
-
-        detailsRepository = moviesNetworkService.let {
-            DetailsRepository(
-                moviesNetworkService,
-                NetworkMovieMapper(),
-                NetworkTvShowMapper(),
-                NetworkTrailersMapper()
-            )
-        }
     }
 
     fun provideGsonBuilder(): Gson {

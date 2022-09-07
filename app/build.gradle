@@ -8,6 +8,10 @@ android {
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
+    viewBinding {
+        enabled true
+    }
+
     defaultConfig {
         applicationId "com.gkonstantakis.moviesapp"
         minSdkVersion 21
