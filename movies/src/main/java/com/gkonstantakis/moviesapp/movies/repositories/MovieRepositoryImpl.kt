@@ -49,28 +49,24 @@ class MovieRepositoryImpl(
             }
         }
 
-    override suspend fun getMovieById(id: Int): Flow<DataState<List<Movie>>> = flow {
+    override suspend fun getMovieById(id: Int): Flow<DataState<Movie>> = flow {
         emit(DataState.Loading)
         try {
-            val movies: ArrayList<Movie> = ArrayList()
             val networkMovie = movieNetworkService.getMovieById(id)
             val movie = networkMovieMapper.mapFromEntity(networkMovie)
-            movies.add(movie)
-            emit(DataState.Success(movies))
+            emit(DataState.SuccessMovie(movie))
         } catch (e: Exception) {
             Log.e("MovieRepositoryImpl", "getMovieById: " + e.toString())
             emit(DataState.Error("GET_MOVIE_ERROR"))
         }
     }
 
-    override suspend fun getTvShowById(id: Int): Flow<DataState<List<TvShow>>> = flow {
+    override suspend fun getTvShowById(id: Int): Flow<DataState<TvShow>> = flow {
         emit(DataState.Loading)
         try {
-            val tvShows: ArrayList<TvShow> = ArrayList()
             val networkTvShow = movieNetworkService.getTvShowById(id)
             val tvShow = networkTvShowMapper.mapFromEntity(networkTvShow)
-            tvShows.add(tvShow)
-            emit(DataState.Success(tvShows))
+            emit(DataState.SuccessTvShow(tvShow))
         } catch (e: Exception) {
             Log.e("MovieRepositoryImpl", "getTvShowById: " + e.toString())
             emit(DataState.Error("GET_TV_SHOW_ERROR"))

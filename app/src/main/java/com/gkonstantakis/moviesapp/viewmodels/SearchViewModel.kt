@@ -17,7 +17,6 @@ class SearchViewModel(
 ) : ViewModel() {
 
     private val _dataState: MutableLiveData<DataState<List<SearchResult>>> = MutableLiveData()
-
     val dataState: LiveData<DataState<List<SearchResult>>>
         get() = _dataState
 
