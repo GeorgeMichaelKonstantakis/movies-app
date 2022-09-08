@@ -37,6 +37,7 @@ class SearchResultsAdapter(
 
     override fun onBindViewHolder(holder: SearchResultViewHolder, position: Int) {
         val binding = holder.searchResultItemBinding
+        holder.setIsRecyclable(false);
         holder.itemView.apply {
             val searchResult = searchResults[holder.adapterPosition]
 

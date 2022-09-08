@@ -48,6 +48,7 @@
                 android:layout_marginTop="@dimen/_5sdp"
                 android:layout_marginBottom="@dimen/_5sdp"
                 android:text="Title"
+                android:maxLines="2"
                 android:textAlignment="center"
                 android:textColor="@color/pink_text_1"
                 android:textSize="@dimen/_15sdp"

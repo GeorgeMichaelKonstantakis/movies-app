@@ -122,6 +122,8 @@ class DetailsFragment : Fragment() {
         viewModel?.movieDataState?.observe(viewLifecycleOwner, Observer { datastate ->
             when (datastate) {
                 is DataState.SuccessMovie -> {
+                    networkErrorTextView.visibility = View.GONE
+                    dataLoading(false)
                     movie = datastate.movie
                     displayMovieInfo()
                     viewModel!!.setStateEvent(
@@ -130,10 +132,12 @@ class DetailsFragment : Fragment() {
                     )
                 }
                 is DataState.Error -> {
-
+                    dataLoading(false)
+                    networkErrorTextView.visibility = View.VISIBLE
                 }
                 is DataState.Loading -> {
                     dataLoading(true)
+                    networkErrorTextView.visibility = View.GONE
                 }
             }
         })
@@ -141,6 +145,8 @@ class DetailsFragment : Fragment() {
         viewModel?.tvShowDataState?.observe(viewLifecycleOwner, Observer { datastate ->
             when (datastate) {
                 is DataState.SuccessTvShow -> {
+                    networkErrorTextView.visibility = View.GONE
+                    dataLoading(false)
                     tvShow = datastate.tvShow
                     displayTvShowInfo()
                     viewModel!!.setStateEvent(
@@ -149,24 +155,33 @@ class DetailsFragment : Fragment() {
                     )
                 }
                 is DataState.Error -> {
-
+                    dataLoading(false)
+                    networkErrorTextView.visibility = View.VISIBLE
                 }
                 is DataState.Loading -> {
                     dataLoading(true)
+                    networkErrorTextView.visibility = View.GONE
                 }
             }
         })
 
         viewModel?.trailersDataState?.observe(viewLifecycleOwner, Observer { datastate ->
             when (datastate) {
-                is DataState.SuccessMovie -> {
-
+                is DataState.Success<List<Trailer>> -> {
+                    networkErrorTextView.visibility = View.GONE
+                    dataLoading(false)
+                    val trailerKey = getYoutubeTrailerKey(datastate.data)
+                    if (trailerKey != null) {
+                        displayVideo(trailerKey)
+                    }
                 }
                 is DataState.Error -> {
-
+                    dataLoading(false)
+                    networkErrorTextView.visibility = View.VISIBLE
                 }
                 is DataState.Loading -> {
                     dataLoading(true)
+                    networkErrorTextView.visibility = View.GONE
                 }
             }
         })
@@ -243,7 +258,7 @@ class DetailsFragment : Fragment() {
 
         val viewMarginHorizontal: Double = (viewResources.getDimension(R.dimen._20sdp).toDouble())
 
-        val finalWidth = widthScreenPixels - viewMarginHorizontal
+        val finalWidth = widthScreenPixels - viewMarginHorizontal - (viewResources.getDimension(R.dimen._20sdp).toDouble())
         val finalHeight = (((1/aspectRatio).toDouble())*(finalWidth.toDouble())).toInt()
 
         return "width=\"${finalWidth/scale}\" height=\"${finalHeight/scale}\""
@@ -260,7 +275,7 @@ class DetailsFragment : Fragment() {
     fun navigateToSearchScreen() {
         val bundle = Bundle()
         Navigation.findNavController(this.requireActivity(), R.id.nav_host_fragment)
-            .navigate(R.id.action_searchFragment_to_detailsFragment, bundle)
+            .navigate(R.id.action_detailsFragment_to_searchFragment, bundle)
     }
 
     companion object {

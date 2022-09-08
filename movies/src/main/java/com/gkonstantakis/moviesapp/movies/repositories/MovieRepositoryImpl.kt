@@ -41,7 +41,7 @@ class MovieRepositoryImpl(
                     }
                 }
                 val searchResults =
-                    networkSearchItemMapper.mapFromListOfEntities(validSearchResults)
+                        networkSearchItemMapper.mapFromListOfEntities(validSearchResults)
                 emit(DataState.Success(searchResults))
             } catch (e: Exception) {
                 Log.e("MovieRepositoryImpl", "getSearchResults: " + e.toString())
