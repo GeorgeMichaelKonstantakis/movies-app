@@ -11,9 +11,9 @@ interface MovieRepository {
 
     suspend fun getSearchResults(query: String, page: Int): Flow<DataState<List<SearchResult>>>
 
-    suspend fun getMovieById(id: Int): Flow<DataState<List<Movie>>>
+    suspend fun getMovieById(id: Int): Flow<DataState<Movie>>
 
-    suspend fun getTvShowById(id: Int): Flow<DataState<List<TvShow>>>
+    suspend fun getTvShowById(id: Int): Flow<DataState<TvShow>>
 
     suspend fun getMovieTrailersById(id: Int): Flow<DataState<List<Trailer>>>
 

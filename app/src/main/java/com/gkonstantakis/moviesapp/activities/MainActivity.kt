@@ -1,12 +1,12 @@
 package com.gkonstantakis.moviesapp.activities
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.fragment.NavHostFragment
 import com.gkonstantakis.moviesapp.R
 import com.gkonstantakis.moviesapp.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : FragmentActivity() {
 
     private lateinit var activityViewBinding: ActivityMainBinding
 
@@ -21,6 +21,15 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         navigateToSearchScreen()
     }
+
+//    override fun onBackPressed() {
+//        super.onBackPressed()
+//
+//        val navHostFragment =
+//                supportFragmentManager.findFragmentByTag("fragment_nav") as NavHostFragment
+//
+//        navHostFragment.childFragmentManager.fragments[1].
+//    }
 
     fun navigateToSearchScreen() {
         val navHostFragment =

@@ -37,6 +37,7 @@ class SearchResultsAdapter(
 
     override fun onBindViewHolder(holder: SearchResultViewHolder, position: Int) {
         val binding = holder.searchResultItemBinding
+        holder.setIsRecyclable(false);
         holder.itemView.apply {
             val searchResult = searchResults[holder.adapterPosition]
 
@@ -78,8 +79,8 @@ class SearchResultsAdapter(
 
     fun navigateToMovieDetailsScreen(searchResult: UiSearchResult, isMovie: Boolean) {
         val bundle = Bundle()
-        bundle.putInt("name", searchResult.id!!)
-        bundle.putBoolean("isMovie", isMovie)
+        bundle.putInt("ID", searchResult.id!!)
+        bundle.putBoolean("IS_MOVIE", isMovie)
         Navigation.findNavController(activity, R.id.nav_host_fragment)
             .navigate(R.id.action_searchFragment_to_detailsFragment, bundle)
     }

@@ -1,8 +1,11 @@
 package com.gkonstantakis.moviesapp.fragments
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -56,6 +59,8 @@ class SearchFragment : Fragment() {
     private lateinit var linearLayoutManager: LinearLayoutManager
 
     private var countPaging = 1
+    private var newNetworkRequest = true
+    private var isNewDataLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,13 +104,21 @@ class SearchFragment : Fragment() {
             override fun afterTextChanged(p0: Editable?) {
                 val inputText = p0.toString()
                 if (inputText.isNotEmpty()) {
-                    viewModel.setStateEvent(
-                        SearchStateEvent.GetNetworkProducts,
-                        SearchEventParams(inputText, countPaging)
-                    )
+                    if(!isNewDataLoading) {
+                        isNewDataLoading = true
+                        countPaging = 1
+                        viewModel.setStateEvent(
+                                SearchStateEvent.GetNetworkProducts,
+                                SearchEventParams(inputText, countPaging)
+                        )
+                    }
                 }
             }
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
     }
 
     fun subscribeObservers() {
@@ -118,19 +131,41 @@ class SearchFragment : Fragment() {
                         searchResults.clear()
                         //DisplayErrorMessage
                     } else {
+                        val tempSearchResults: MutableList<UiSearchResult> = ArrayList<UiSearchResult>()
                         if (searchResults.isNullOrEmpty()) {
                             for (data in datastate.data) {
-                                searchResults.add(UiSearchResultMapper().mapToEntity(data))
+                                tempSearchResults.add(UiSearchResultMapper().mapToEntity(data))
                             }
+                            searchResults = tempSearchResults.distinctBy {
+                                it.id
+                            }.toMutableList()
+
                             displayProductsList()
                         } else {
-                            searchResults.clear()
-                            for (data in datastate.data) {
-                                searchResults.add(UiSearchResultMapper().mapToEntity(data))
+                            deleteSearchResults()
+                            if (newNetworkRequest) {
+                                searchResults.clear()
                             }
+                            searchResults?.forEach {
+                                tempSearchResults.add(it)
+                            }
+                            for (data in datastate.data) {
+                                tempSearchResults.add(UiSearchResultMapper().mapToEntity(data))
+                            }
+
+                            searchResults = tempSearchResults.distinctBy {
+                                it.id
+                            }.toMutableList()
+
                             updateSearchResults(searchResults)
+                            newNetworkRequest = true
+                        }
+                        searchResults.forEachIndexed { index, uiSearchResult ->
+                            Log.e("SearchResultsItmems", "index: " + index + ", title: " + uiSearchResult.title)
                         }
                     }
+                    Log.e("DataState.SuccessList", "TRUE")
+                    isNewDataLoading = false
                 }
                 is DataState.Error -> {
                     dataLoading(false)
@@ -141,7 +176,6 @@ class SearchFragment : Fragment() {
                     }
                 }
                 is DataState.Loading -> {
-                    deleteSearchResults()
                     dataLoading(true)
                 }
                 else -> {
@@ -154,15 +188,44 @@ class SearchFragment : Fragment() {
     private fun displayProductsList() {
         if (!searchResults.isNullOrEmpty()) {
             moviesListRecyclerView.adapter = SearchResultsAdapter(
-                searchResults,
-                UiSearchResultMapper(),
-                viewModel,
-                this.requireActivity() as MainActivity
+                    searchResults,
+                    UiSearchResultMapper(),
+                    viewModel,
+                    this.requireActivity() as MainActivity
             )
             searchResultsAdapter = moviesListRecyclerView.adapter as SearchResultsAdapter
             linearLayoutManager =
-                LinearLayoutManager(this.context, LinearLayoutManager.VERTICAL, false)
+                    LinearLayoutManager(this.context, LinearLayoutManager.VERTICAL, false)
             moviesListRecyclerView.layoutManager = linearLayoutManager
+
+            moviesListRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    if (dy > 0) {
+                        val visibleItemCount = linearLayoutManager.childCount
+                        val totalItemCount = linearLayoutManager.itemCount
+                        val firstVisibleItemPosition =
+                                linearLayoutManager.findFirstVisibleItemPosition()
+
+                        if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                                && firstVisibleItemPosition >= 0
+                        ) {
+
+                            if (!isNewDataLoading) {
+                                isNewDataLoading = true
+                                countPaging++
+                                newNetworkRequest = false
+                                viewModel.setStateEvent(
+                                        SearchStateEvent.GetNetworkProducts,
+                                        SearchEventParams(searchInputText.text.toString(), countPaging)
+                                )
+                            }
+                        }
+                    }
+                }
+
+            })
         }
     }
 
